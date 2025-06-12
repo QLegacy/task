@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подтверждение v1</title>
+    <title>Подтверждение v1.0001</title>
     <style>
         /* Стили остались те же */
         body {
@@ -126,74 +126,74 @@
         </div>
     </div>
 
-    <script>
-        // --- НАСТРОЙКА ---
-        const redirectUrl = "https://youtu.be/dQw4w9WgXcQ"; 
-        // -----------------
+<script>
+    const redirectUrl = "https://youtu.be/dQw4w9WgXcQ";
 
-        const initialWarning = document.getElementById('initial-warning');
-        const holdScreen = document.getElementById('hold-screen');
-        const confirmButton = document.getElementById('confirm-button');
-        const holdButton = document.getElementById('hold-button');
-        const buttonWrapper = document.querySelector('.button-wrapper');
+    const initialWarning = document.getElementById('initial-warning');
+    const holdScreen = document.getElementById('hold-screen');
+    const confirmButton = document.getElementById('confirm-button');
+    const holdButton = document.getElementById('hold-button');
+    const buttonWrapper = document.querySelector('.button-wrapper');
 
-        let holdTimeout;
-        let waveInterval;
+    let holdTimeout;
+    let waveInterval;
 
-        // --- ИЗМЕНЕНИЯ В JAVASCRIPT ---
+    // Альтернативный эффект, если вибрация не работает
+    const flashEffect = () => {
+        holdButton.style.boxShadow = '0 0 10px #64b5f6';
+        setTimeout(() => {
+            holdButton.style.boxShadow = 'none';
+        }, 100);
+    };
 
-        const startHold = () => {
-            holdButton.classList.add('holding');
-            
-            // Запускаем таймер для перенаправления
-            holdTimeout = setTimeout(() => {
-                clearInterval(waveInterval); 
-                window.location.href = redirectUrl;
-            }, 3000);
+    const createWaveAndVibrate = () => {
+        // Визуальная волна
+        const wave = document.createElement('div');
+        wave.classList.add('hold-wave');
+        buttonWrapper.appendChild(wave);
+        wave.addEventListener('animationend', () => wave.remove());
 
-            // Функция, которая создает волну и вызывает вибрацию
-            const createWaveAndVibrate = () => {
-                // 1. Создаем визуальную волну
-                const wave = document.createElement('div');
-                wave.classList.add('hold-wave');
-                buttonWrapper.appendChild(wave);
-                wave.addEventListener('animationend', () => wave.remove());
+        // Вибрация или альтернатива
+        const vibResult = navigator.vibrate?.(50);
+        if (!vibResult) {
+            flashEffect(); // fallback эффект
+        }
+    };
 
-                // 2. Запускаем короткую вибрацию (50 миллисекунд)
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(50); 
-                }
-            };
-            
-            // Сразу запускаем первую волну и вибрацию
-            createWaveAndVibrate(); 
-            // И запускаем интервал для последующих
-            waveInterval = setInterval(createWaveAndVibrate, 400);
-        };
+    const startHold = () => {
+        holdButton.classList.add('holding');
 
-        const cancelHold = () => {
-            holdButton.classList.remove('holding');
-            
-            // Отменяем вибрацию (важно для некоторых устройств)
-            if ('vibrate' in navigator) {
-                navigator.vibrate(0);
-            }
-            
-            clearTimeout(holdTimeout);
+        holdTimeout = setTimeout(() => {
             clearInterval(waveInterval);
-        };
-        
-        confirmButton.addEventListener('click', () => {
-            initialWarning.style.display = 'none';
-            holdScreen.style.display = 'flex';
-        });
-        
-        holdButton.addEventListener('mousedown', startHold);
-        holdButton.addEventListener('touchstart', (e) => { e.preventDefault(); startHold(); });
+            window.location.href = redirectUrl;
+        }, 3000);
 
-        holdButton.addEventListener('mouseup', cancelHold);
-        holdButton.addEventListener('mouseleave', cancelHold);
-        holdButton.addEventListener('touchend', cancelHold);
-    </script>
+        createWaveAndVibrate();
+        waveInterval = setInterval(createWaveAndVibrate, 400);
+    };
+
+    const cancelHold = () => {
+        holdButton.classList.remove('holding');
+        navigator.vibrate?.(0);
+        clearTimeout(holdTimeout);
+        clearInterval(waveInterval);
+    };
+
+    confirmButton.addEventListener('click', () => {
+        initialWarning.style.display = 'none';
+        holdScreen.style.display = 'flex';
+    });
+
+    holdButton.addEventListener('mousedown', startHold);
+    holdButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        setTimeout(startHold, 50); // задержка на тач
+    });
+
+    holdButton.addEventListener('mouseup', cancelHold);
+    holdButton.addEventListener('mouseleave', cancelHold);
+    holdButton.addEventListener('touchend', cancelHold);
+</script>
+
 </body>
 </html>
