@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Подтверждение</title>
     <style>
-        /* Базовые стили для страницы */
+        /* Стили остались те же */
         body {
             margin: 0;
             background-color: #121212;
@@ -18,22 +18,17 @@
             text-align: center;
             overflow: hidden;
         }
-
-        /* Контейнер для контента */
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
         }
-
         p {
             font-size: 1.2rem;
             max-width: 600px;
             margin-bottom: 30px;
         }
-
-        /* Стили для первой кнопки "Готов(а)" */
         .btn {
             padding: 15px 30px;
             font-size: 1.1rem;
@@ -45,17 +40,13 @@
             cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
         }
-
         .btn:hover {
             background-color: #0056b3;
             transform: scale(1.05);
         }
-
         #hold-screen {
             display: none;
         }
-        
-        /* Контейнер для кнопки и волн */
         .button-wrapper {
             position: relative;
             width: 100px;
@@ -64,11 +55,9 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* Сама тёмно-синяя кнопка */
         #hold-button {
             position: relative;
-            z-index: 10; /* Кнопка всегда сверху */
+            z-index: 10;
             width: 100%;
             height: 100%;
             background-color: #0d47a1;
@@ -77,10 +66,6 @@
             cursor: pointer;
             transition: transform 0.1s linear;
         }
-
-        /* --- СТИЛИ ДЛЯ ВОЛН --- */
-
-        /* 1. Волны в "спящем" режиме (CSS) */
         #hold-button::before,
         #hold-button::after {
             content: '';
@@ -95,52 +80,34 @@
             opacity: 0;
             z-index: 5;
         }
-
         #hold-button::after {
             animation-delay: 1.25s;
         }
-
         @keyframes idle-wave {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(2.5); opacity: 0; }
         }
-
-        /* 2. Волны при УДЕРЖАНИИ (создаются через JS) */
         .hold-wave {
             position: absolute;
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            border: 2px solid #64b5f6; /* Чуть другой цвет для разнообразия */
+            border: 2px solid #64b5f6;
             animation: hold-wave-anim 1.5s ease-out forwards;
-            pointer-events: none; /* Чтобы волны не мешали нажимать на кнопку */
+            pointer-events: none;
             z-index: 1;
         }
-        
         @keyframes hold-wave-anim {
-            from {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-            to {
-                transform: scale(4); /* Расходятся дальше */
-                opacity: 0;
-            }
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(4); opacity: 0; }
         }
-        
-        /* --- СТИЛИ ДЛЯ УДЕРЖАНИЯ --- */
-
         #hold-button.holding {
-            /* Запускаем анимацию роста */
             animation: grow 3s linear forwards;
         }
-
-        /* При удержании скрываем "спящие" волны, чтобы они не мешали новым */
         #hold-button.holding::before,
         #hold-button.holding::after {
             display: none;
         }
-
         @keyframes grow {
             from { transform: scale(1); }
             to { transform: scale(15); opacity: 0; }
@@ -152,7 +119,6 @@
         <p>Вы готовы посмотреть данный контент? Мы не несём ответственности за контент, что будет дальше.</p>
         <button class="btn" id="confirm-button">Готов(а)</button>
     </div>
-
     <div class="container" id="hold-screen">
         <p>Удерживайте кнопку ниже</p>
         <div class="button-wrapper">
@@ -162,7 +128,7 @@
 
     <script>
         // --- НАСТРОЙКА ---
-        const redirectUrl = "https://t.me/quadlegacybio"; 
+        const redirectUrl = "https://youtu.be/dQw4w9WgXcQ"; 
         // -----------------
 
         const initialWarning = document.getElementById('initial-warning');
@@ -172,51 +138,48 @@
         const buttonWrapper = document.querySelector('.button-wrapper');
 
         let holdTimeout;
-        let waveInterval; // Переменная для интервала создания волн
+        let waveInterval;
 
-        // Функция для создания одной волны при удержании
-        const createHoldWave = () => {
-            const wave = document.createElement('div');
-            wave.classList.add('hold-wave');
-            buttonWrapper.appendChild(wave);
-            // Удаляем элемент волны после окончания ее анимации, чтобы не засорять DOM
-            wave.addEventListener('animationend', () => {
-                wave.remove();
-            });
-        };
+        // --- ИЗМЕНЕНИЯ В JAVASCRIPT ---
 
         const startHold = () => {
-            // 1. Добавляем класс для анимации роста
             holdButton.classList.add('holding');
-
-            // 2. Запускаем вибрацию на 3 секунды, если поддерживается
-            if ('vibrate' in navigator) {
-                navigator.vibrate(3000);
-            }
             
-            // 3. Запускаем таймер для перенаправления
+            // Запускаем таймер для перенаправления
             holdTimeout = setTimeout(() => {
-                clearInterval(waveInterval); // Останавливаем создание волн перед редиректом
+                clearInterval(waveInterval); 
                 window.location.href = redirectUrl;
             }, 3000);
 
-            // 4. Запускаем интервал, который создает волны каждые 400мс
-            waveInterval = setInterval(createHoldWave, 400);
+            // Функция, которая создает волну и вызывает вибрацию
+            const createWaveAndVibrate = () => {
+                // 1. Создаем визуальную волну
+                const wave = document.createElement('div');
+                wave.classList.add('hold-wave');
+                buttonWrapper.appendChild(wave);
+                wave.addEventListener('animationend', () => wave.remove());
+
+                // 2. Запускаем короткую вибрацию (50 миллисекунд)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50); 
+                }
+            };
+            
+            // Сразу запускаем первую волну и вибрацию
+            createWaveAndVibrate(); 
+            // И запускаем интервал для последующих
+            waveInterval = setInterval(createWaveAndVibrate, 400);
         };
 
         const cancelHold = () => {
-            // 1. Убираем класс, сбрасывая анимацию роста
             holdButton.classList.remove('holding');
             
-            // 2. Отменяем вибрацию
+            // Отменяем вибрацию (важно для некоторых устройств)
             if ('vibrate' in navigator) {
                 navigator.vibrate(0);
             }
             
-            // 3. Отменяем таймер перенаправления
             clearTimeout(holdTimeout);
-            
-            // 4. Останавливаем создание новых волн
             clearInterval(waveInterval);
         };
         
