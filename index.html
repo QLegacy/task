@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подтверждение v1.0001</title>
+    <title>Секрет</title>
     <style>
         /* Стили остались те же */
         body {
@@ -127,7 +127,7 @@
     </div>
 
 <script>
-    const redirectUrl = "https://youtu.be/dQw4w9WgXcQ";
+    const redirectUrl = "https://t.me/quadlegacybio";
 
     const initialWarning = document.getElementById('initial-warning');
     const holdScreen = document.getElementById('hold-screen');
@@ -135,48 +135,82 @@
     const holdButton = document.getElementById('hold-button');
     const buttonWrapper = document.querySelector('.button-wrapper');
 
-    let holdTimeout;
-    let waveInterval;
+    let holdStartTime = null;
+    let holdTimer = null;
+    let intervalTimer = null;
+    let pulseInterval = null;
 
-    // Альтернативный эффект, если вибрация не работает
     const flashEffect = () => {
         holdButton.style.boxShadow = '0 0 10px #64b5f6';
-        setTimeout(() => {
-            holdButton.style.boxShadow = 'none';
-        }, 100);
+        setTimeout(() => holdButton.style.boxShadow = 'none', 100);
     };
 
     const createWaveAndVibrate = () => {
-        // Визуальная волна
         const wave = document.createElement('div');
         wave.classList.add('hold-wave');
         buttonWrapper.appendChild(wave);
         wave.addEventListener('animationend', () => wave.remove());
 
-        // Вибрация или альтернатива
         const vibResult = navigator.vibrate?.(50);
-        if (!vibResult) {
-            flashEffect(); // fallback эффект
+        if (!vibResult) flashEffect();
+    };
+
+    const startPulseEffect = () => {
+        document.body.style.transition = 'background-color 0.1s';
+        let on = false;
+        pulseInterval = setInterval(() => {
+            document.body.style.backgroundColor = on ? '#121212' : '#1e1e1e';
+            on = !on;
+        }, 100);
+    };
+
+    const stopPulseEffect = () => {
+        clearInterval(pulseInterval);
+        document.body.style.backgroundColor = '#121212';
+    };
+
+    const startIncreasingWaves = () => {
+        if (intervalTimer) clearInterval(intervalTimer);
+
+        const elapsed = Date.now() - holdStartTime;
+        const remaining = 3000 - elapsed;
+        let nextInterval;
+
+        if (remaining > 2000) nextInterval = 400;
+        else if (remaining > 1200) nextInterval = 300;
+        else if (remaining > 600) nextInterval = 200;
+        else {
+            nextInterval = 100;
+            startPulseEffect();
         }
+
+        createWaveAndVibrate();
+
+        intervalTimer = setInterval(() => {
+            createWaveAndVibrate();
+            startIncreasingWaves(); // recursive interval update
+        }, nextInterval);
     };
 
     const startHold = () => {
+        holdStartTime = Date.now();
         holdButton.classList.add('holding');
 
-        holdTimeout = setTimeout(() => {
-            clearInterval(waveInterval);
+        holdTimer = setTimeout(() => {
+            clearInterval(intervalTimer);
+            stopPulseEffect();
             window.location.href = redirectUrl;
         }, 3000);
 
-        createWaveAndVibrate();
-        waveInterval = setInterval(createWaveAndVibrate, 400);
+        startIncreasingWaves();
     };
 
     const cancelHold = () => {
         holdButton.classList.remove('holding');
         navigator.vibrate?.(0);
-        clearTimeout(holdTimeout);
-        clearInterval(waveInterval);
+        clearTimeout(holdTimer);
+        clearInterval(intervalTimer);
+        stopPulseEffect();
     };
 
     confirmButton.addEventListener('click', () => {
@@ -187,13 +221,14 @@
     holdButton.addEventListener('mousedown', startHold);
     holdButton.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        setTimeout(startHold, 50); // задержка на тач
+        setTimeout(startHold, 50);
     });
 
     holdButton.addEventListener('mouseup', cancelHold);
     holdButton.addEventListener('mouseleave', cancelHold);
     holdButton.addEventListener('touchend', cancelHold);
 </script>
+
 
 </body>
 </html>
